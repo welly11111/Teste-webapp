@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UnlockIt</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0f4ff;
+    --white: #ffffff;
+    --blue: #1d6aff;
+    --blue-dark: #1452cc;
+    --blue-light: #e8efff;
+    --blue-mid: #c2d5ff;
+    --border: #dce6ff;
+    --text: #0f1f4b;
+    --muted: #6b7fa3;
+    --success: #0ea472;
+    --danger: #e53e3e;
+    --warning: #d97706;
+    --glow: rgba(29,106,255,0.18);
+    --font: 'Inter', sans-serif;
+    --mono: 'Space Mono', monospace;
+    --radius: 14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ══════════════════════════════
+     TELA: USUÁRIO
+  ══════════════════════════════ */
+  #screen-user {
+    background: linear-gradient(160deg, #e8efff 0%, #f7f9ff 60%, #ffffff 100%);
+  }
+
+  .user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--blue);
+    letter-spacing: -0.03em;
+  }
+
+  .logo-mark {
+    width: 30px; height: 30px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 0.95rem;
+  }
+
+  .btn-publicar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 0.45rem 1.1rem;
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .btn-publicar:hover { background: var(--blue-dark); transform: translateY(-1px); }
+
+  .user-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.25rem 3rem;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Lock hero */
+  .lock-hero {
+    text-align: center;
+    margin-bottom: 2.25rem;
+  }
+
+  .lock-circle {
+    width: 92px; height: 92px;
+    background: var(--white);
+    border: 2.5px solid var(--blue-mid);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 4px 20px rgba(29,106,255,0.1);
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .lock-circle.open {
+    border-color: var(--success);
+    box-shadow: 0 0 0 6px rgba(14,164,114,0.12), 0 4px 20px rgba(14,164,114,0.2);
+    animation: popOpen 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popOpen {
+    0%  { transform: scale(1); }
+    50% { transform: scale(1.15) rotate(-8deg); }
+    100%{ transform: scale(1) rotate(0deg); }
+  }
+
+  .lock-icon { font-size: 2.4rem; transition: all 0.3s; }
+
+  .lock-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .lock-sub {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.55;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* Tasks */
+  .tasks-box {
+    width: 100%;
+    margin-bottom: 1.75rem;
+  }
+
+  .tasks-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.65rem;
+  }
+
+  .task-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.55rem;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .task-row.done {
+    border-color: var(--success);
+    background: #f0faf6;
+  }
+
+  .task-check {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--blue-mid);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    transition: all 0.25s;
+  }
+
+  .task-row.done .task-check {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .task-info { flex: 1; }
+  .task-info-name { font-size: 0.875rem; font-weight: 500; }
+  .task-info-link {
+    display: inline-block;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .task-info-link:hover { text-decoration: underline; }
+
+  .task-done-btn {
+    background: var(--blue-light);
+    border: none;
+    color: var(--blue);
+    font-family: var(--font);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .task-done-btn:hover { background: var(--blue-mid); }
+
+  .task-timer-badge {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--warning);
+    font-weight: 700;
+    background: #fff7ed;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+  }
+
+  /* Code input area */
+  .code-area { width: 100%; }
+
+  .code-tabs-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .ctab {
+    flex: 1;
+    padding: 0.55rem;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .ctab.active {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  .ctab-pane { display: none; }
+  .ctab-pane.active { display: block; }
+
+  .code-input-big {
+    width: 100%;
+    background: var(--white);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 2rem;
+    text-align: center;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 0.75rem;
+  }
+  .code-input-big:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px var(--glow);
+  }
+
+  .btn-unlock {
+    width: 100%;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.9rem;
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: -0.01em;
+  }
+  .btn-unlock:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 18px var(--glow); }
+
+  .err-msg {
+    color: var(--danger);
+    font-size: 0.82rem;
+    text-align: center;
+    margin-top: 0.6rem;
+    min-height: 1.2em;
+    font-weight: 500;
+  }
+
+  #qr-reader { border-radius: 12px; overflow: hidden; margin-bottom: 0.75rem; }
+
+  /* Revealed */
+  .revealed-box {
+    display: none;
+    width: 100%;
+    background: var(--white);
+    border: 2px solid var(--success);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    animation: riseUp 0.45s ease;
+  }
+  .revealed-box.show { display: block; }
+
+  @keyframes riseUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .rev-badge {
+    display: inline-block;
+    background: #ecfdf5;
+    color: var(--success);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 0.9rem;
+  }
+
+  .rev-content {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.6;
+    word-break: break-word;
+  }
+
+  .rev-link-btn {
+    display: inline-block;
+    margin-top: 1.1rem;
+    padding: 0.6rem 1.4rem;
+    background: var(--blue);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .rev-link-btn:hover { background: var(--blue-dark); }
+
+  /* Confetti */
+  .conf-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
+  .conf-dot {
+    position: absolute;
+    border-radius: 50%;
+    animation: confFall 1.1s ease-out forwards;
+  }
+  @keyframes confFall {
+    0%   { transform: translateY(-10px) scale(0); opacity: 1; }
+    100% { transform: translateY(95vh) rotate(360deg); opacity: 0; }
+  }
+
+
+  /* ══════════════════════════════
+     TELA: PUBLICAR (ADMIN)
+  ══════════════════════════════ */
+  #screen-publish {
+    background: var(--white);
+  }
+
+  .pub-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .btn-back {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.05rem;
+    transition: background 0.18s, border-color 0.18s;
+    flex-shrink: 0;
+  }
+  .btn-back:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+
+  .pub-header-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .pub-body {
+    flex: 1;
+    padding: 1.75rem 1.5rem 3rem;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+    overflow-y: auto;
+  }
+
+  /* Form elements */
+  .field { margin-bottom: 1.25rem; }
+
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.02em;
+  }
+
+  .field input[type="text"],
+  .field input[type="url"],
+  .field textarea,
+  .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.9rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+
+  .section-head {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 0.85rem;
+    margin-top: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .section-head:first-child { margin-top: 0; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  @media(max-width:520px){ .row2 { grid-template-columns: 1fr; } }
+
+  /* Task builder */
+  .task-builder {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .task-builder-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+
+  .task-builder-row select,
+  .task-builder-row input {
+    flex: 1;
+    min-width: 110px;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 0.85rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    outline: none;
+  }
+  .task-builder-row select:focus,
+  .task-builder-row input:focus {
+    border-color: var(--blue);
+  }
+
+  .btn-add-task {
+    background: var(--blue-light);
+    border: 1.5px solid var(--blue-mid);
+    color: var(--blue);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.18s;
+    white-space: nowrap;
+  }
+  .btn-add-task:hover { background: var(--blue-mid); }
+
+  .task-chips { display: flex; flex-direction: column; gap: 0.45rem; }
+
+  .task-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.83rem;
+  }
+
+  .chip-icon { font-size: 0.95rem; }
+  .chip-name { flex: 1; color: var(--text); }
+  .chip-secs { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+
+  .chip-del {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.55;
+    transition: opacity 0.15s;
+    padding: 0 0.15rem;
+  }
+  .chip-del:hover { opacity: 1; }
+
+  /* Code section */
+  .code-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+  }
+
+  .code-row .field { flex: 1; margin-bottom: 0; }
+
+  .btn-gen {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+    height: 42px;
+  }
+  .btn-gen:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+
+  /* Publish btn */
+  .btn-publish-main {
+    width: 100%;
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.95rem;
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    letter-spacing: -0.01em;
+  }
+  .btn-publish-main:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: 0 6px 18px var(--glow); }
+
+  /* Output */
+  .output-section {
+    display: none;
+    margin-top: 1.75rem;
+    background: var(--blue-light);
+    border: 1.5px solid var(--blue-mid);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+
+  .out-code-box {
+    background: var(--white);
+    border: 2px solid var(--blue);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+    margin-bottom: 1.1rem;
+  }
+
+  .out-code-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .out-code-big {
+    font-family: var(--mono);
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--blue);
+  }
+
+  .out-copy-btn {
+    position: absolute;
+    top: 0.5rem; right: 0.5rem;
+    background: var(--blue-light);
+    border: 1px solid var(--blue-mid);
+    color: var(--blue);
+    font-family: var(--font);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .out-copy-btn:hover { background: var(--blue-mid); }
+
+  .out-qr-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.1rem;
+  }
+
+  .out-qr-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  #qrcode-out canvas { border-radius: 10px; }
+
+  .out-link-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    word-break: break-all;
+  }
+
+  .out-link-text { flex: 1; }
+
+  /* ══════════════════════════════
+     OVERLAY: TAREFA "FICAR NA PÁGINA" (fullscreen)
+  ══════════════════════════════ */
+  .visit-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: #fff;
+    flex-direction: column;
+  }
+  .visit-overlay.active { display: flex; }
+
+  .visit-progress-track {
+    width: 100%;
+    height: 5px;
+    background: var(--blue-light);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .visit-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--blue);
+    transition: width 0.2s linear;
+  }
+
+  .visit-progress-label {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: rgba(15,31,75,0.78);
+    color: white;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    z-index: 5;
+  }
+
+  .visit-iframe-wrap {
+    flex: 1;
+    position: relative;
+    background: #fafafa;
+  }
+
+  .visit-iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+
+  .visit-done-banner {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--success);
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 2001;
+    animation: slideUpBanner 0.35s ease;
+    font-family: var(--font);
+  }
+  .visit-done-banner.show,
+  .visit-done-banner[style*="flex"] { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .visit-done-banner:hover { background: #0c9163; }
+  .visit-done-banner:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  @keyframes slideUpBanner { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--font);
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    animation: toastIn 0.25s ease;
+  }
+  @keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(8px);} to { opacity:1; transform:translateX(-50%) translateY(0);} }
+
+  /* Timer wrap in publish */
+  .timer-field { display: none; }
+</style>
+</head>
+<body>
+
+<div class="conf-wrap" id="conf-wrap"></div>
+
+<!-- Overlay fullscreen: WebApp revelado -->
+<div class="visit-overlay" id="webapp-overlay">
+  <div style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 1rem;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;z-index:1">
+    <button onclick="closeWebapp()" style="display:flex;align-items:center;gap:0.4rem;background:var(--blue-light);border:1.5px solid var(--blue-mid);color:var(--blue);font-family:var(--font);font-size:0.8rem;font-weight:700;padding:0.35rem 0.75rem;border-radius:8px;cursor:pointer;">
+      ← Voltar
+    </button>
+    <span style="font-size:0.78rem;color:var(--muted);font-weight:500">🌐 WebApp desbloqueada</span>
+  </div>
+  <div class="visit-iframe-wrap">
+    <iframe id="webapp-iframe" srcdoc="" sandbox="allow-scripts allow-forms allow-same-origin" style="width:100%;height:100%;border:none;display:block"></iframe>
+  </div>
+</div>
+
+<!-- Overlay fullscreen: tarefa "ficar na página" -->
+<div class="visit-overlay" id="visit-overlay">
+  <div class="visit-progress-track">
+    <div class="visit-progress-bar" id="visit-progress-bar"></div>
+    <div class="visit-progress-label" id="visit-progress-label">0s / 0s</div>
+  </div>
+  <div class="visit-iframe-wrap">
+    <iframe id="visit-iframe" src="about:blank" allow="autoplay; encrypted-media; fullscreen"></iframe>
+  </div>
+  <button class="visit-done-banner" id="visit-done-btn" onclick="confirmVisitDone()" style="display:none; border:none; cursor:pointer; width:100%;">✅ Tempo concluído — Concluir tarefa</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     TELA USUÁRIO (padrão)
+══════════════════════════════════════ -->
+<div class="screen active" id="screen-user">
+
+  <div class="user-header">
+    <div class="logo">
+      <div class="logo-mark">🔒</div>
+      UnlockIt
+    </div>
+    <button class="btn-publicar" onclick="goPublish()">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 5l3.5-4L10 5M2 11h9" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Publicar
+    </button>
+  </div>
+
+  <div class="user-body">
+
+    <div class="lock-hero">
+      <div class="lock-circle" id="lock-circle">
+        <span class="lock-icon" id="lock-icon">🔒</span>
+      </div>
+      <div class="lock-title" id="lock-title">Desbloquear conteúdo</div>
+      <div class="lock-sub" id="lock-sub">Digite o código para ver o que precisa ser feito.</div>
+    </div>
+
+    <!-- Código (aparece primeiro) -->
+    <div class="code-area" id="code-area">
+      <div class="code-tabs-row">
+        <div class="ctab active" onclick="switchCTab('manual')">⌨️ Digitar código</div>
+        <div class="ctab" onclick="switchCTab('qr')">📷 Escanear QR</div>
+      </div>
+
+      <div class="ctab-pane active" id="cpane-manual">
+        <input class="code-input-big" type="text" id="code-input" placeholder="CÓDIGO" maxlength="12"
+          oninput="this.value=this.value.toUpperCase()"
+          onkeydown="if(event.key==='Enter') lookupCode()">
+        <button class="btn-unlock" id="btn-lookup" onclick="lookupCode()">🔍 Buscar</button>
+        <div class="err-msg" id="err-msg"></div>
+      </div>
+
+      <div class="ctab-pane" id="cpane-qr">
+        <div id="qr-reader"></div>
+        <p style="text-align:center;font-size:0.78rem;color:var(--muted)">Aponte para o QR Code gerado</p>
+      </div>
+    </div>
+
+    <!-- Tarefas (aparecem só depois de buscar o código) -->
+    <div class="tasks-box" id="user-tasks" style="display:none">
+      <div class="tasks-label">Etapas para desbloquear</div>
+      <div id="user-task-list"></div>
+      <button class="btn-unlock" id="btn-final-unlock" style="margin-top:0.85rem;display:none" onclick="finalUnlock()">🔓 Desbloquear</button>
+    </div>
+
+    <!-- Revelado -->
+    <div class="revealed-box" id="revealed-box" style="margin-top:1.5rem">
+      <div class="rev-badge" id="rev-badge">✅ Desbloqueado</div>
+      <div class="rev-content" id="rev-content">—</div>
+      <div id="rev-link-wrap"></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     TELA PUBLICAR (ADMIN)
+══════════════════════════════════════ -->
+<div class="screen" id="screen-publish">
+
+  <div class="pub-header">
+    <button class="btn-back" onclick="goUser()" title="Voltar">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="pub-header-title">Publicar desbloqueio</div>
+  </div>
+
+  <div class="pub-body">
+
+    <!-- Conteúdo -->
+    <div class="section-head">🎁 O que será revelado</div>
+
+    <div class="field">
+      <label>Tipo de conteúdo</label>
+      <select id="p-type" onchange="onTypeChange()">
+        <option value="text">Texto / Mensagem</option>
+        <option value="link">Link / URL</option>
+        <option value="coupon">Cupom / Código de desconto</option>
+        <option value="webapp">🌐 WebApp (página HTML)</option>
+      </select>
+    </div>
+
+    <div class="field" id="p-text-field">
+      <label>Conteúdo</label>
+      <textarea id="p-text" rows="3" placeholder="Ex: Seu código é PROMO20 🎉"></textarea>
+    </div>
+
+    <div class="field" id="p-link-field" style="display:none">
+      <label>URL</label>
+      <input type="url" id="p-link" placeholder="https://...">
+    </div>
+
+    <div class="field" id="p-webapp-field" style="display:none">
+      <label>Código HTML da página</label>
+      <textarea id="p-webapp" rows="10" placeholder="<!DOCTYPE html>&#10;<html>&#10;  <body>&#10;    <h1>Olá!</h1>&#10;  </body>&#10;</html>" style="font-family:var(--mono);font-size:0.8rem;line-height:1.5"></textarea>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem">Cole aqui qualquer HTML — será renderizado como uma página completa ao desbloquear.</div>
+    </div>
+
+    <!-- Tarefas -->
+    <div class="section-head">📋 Tarefas <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;font-size:0.72rem">(opcional)</span></div>
+
+    <div class="task-chips" id="pub-task-chips"></div>
+
+    <div class="task-builder">
+      <div class="task-builder-row">
+        <select id="p-task-type" onchange="onTaskTypeChange()">
+          <option value="follow">📲 Seguir nas redes</option>
+          <option value="visit">⏱️ Ficar na página</option>
+          <option value="custom">✏️ Personalizado</option>
+        </select>
+        <input type="text" id="p-task-name" placeholder="Ex: @conta no Instagram">
+        <input type="url" id="p-task-link" placeholder="Link (opcional)" style="max-width:180px">
+      </div>
+      <div class="task-builder-row timer-field" id="p-timer-field">
+        <input type="text" id="p-task-secs" placeholder="Segundos (ex: 30)" style="max-width:200px">
+      </div>
+      <button class="btn-add-task" onclick="addTask()">+ Adicionar tarefa</button>
+    </div>
+
+    <!-- Código -->
+    <div class="section-head">🔑 Código</div>
+
+    <div class="code-row">
+      <div class="field">
+        <label>Código de desbloqueio</label>
+        <input type="text" id="p-code" placeholder="Ex: SORTE24" style="font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em">
+      </div>
+      <button class="btn-gen" onclick="genCode()">🎲 Gerar</button>
+    </div>
+
+    <button class="btn-publish-main" onclick="doPublish()">🚀 Publicar</button>
+
+    <!-- Output -->
+    <div class="output-section" id="pub-output">
+      <div class="out-code-label" style="text-align:center;margin-bottom:0.25rem">CÓDIGO GERADO</div>
+      <div class="out-code-box">
+        <div class="out-code-label">CÓDIGO</div>
+        <div class="out-code-big" id="out-code-big">——</div>
+        <button class="out-copy-btn" onclick="copyText(appState.code,'Código copiado!')">copiar</button>
+      </div>
+
+      <div class="out-qr-wrap">
+        <div class="out-qr-label">QR Code</div>
+        <div id="qrcode-out"></div>
+      </div>
+
+      <div class="out-link-row">
+        <span class="out-link-text" id="out-link-text">—</span>
+        <button class="out-copy-btn" style="position:static" onclick="copyText(document.getElementById('out-link-text').textContent,'Link copiado!')">copiar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script>
+
+let appState = {
+  code: '',
+  contentType: 'text',
+  contentValue: '',
+  tasks: []
+};
+
+let userTasksDone = [];
+let timers = {};
+let qrScanner = null;
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goPublish() {
+  document.getElementById('screen-user').classList.remove('active');
+  document.getElementById('screen-publish').classList.add('active');
+}
+
+function goUser() {
+  document.getElementById('screen-publish').classList.remove('active');
+  document.getElementById('screen-user').classList.add('active');
+  renderUserView();
+}
+
+// ── Publish (admin) ───────────────────────────────────────────────────────────
+function onTypeChange() {
+  const v = document.getElementById('p-type').value;
+  document.getElementById('p-text-field').style.display   = (v === 'text' || v === 'coupon') ? 'block' : 'none';
+  document.getElementById('p-link-field').style.display   = v === 'link'   ? 'block' : 'none';
+  document.getElementById('p-webapp-field').style.display = v === 'webapp' ? 'block' : 'none';
+}
+
+function onTaskTypeChange() {
+  const isVisit = document.getElementById('p-task-type').value === 'visit';
+  document.getElementById('p-timer-field').style.display = isVisit ? 'flex' : 'none';
+  document.getElementById('p-task-link').placeholder = isVisit ? 'Link da página (obrigatório)' : 'Link (opcional)';
+}
+
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = '';
+  for (let i=0;i<6;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  document.getElementById('p-code').value = c;
+}
+
+function addTask() {
+  const type = document.getElementById('p-task-type').value;
+  const name = document.getElementById('p-task-name').value.trim();
+  const link = document.getElementById('p-task-link').value.trim();
+  const secs = parseInt(document.getElementById('p-task-secs').value) || 30;
+  if (!name) { toast('Preencha o nome da tarefa'); return; }
+  if (type === 'visit' && !link) { toast('Informe o link da página para essa tarefa'); return; }
+  appState.tasks.push({ type, name, link, secs, id: Date.now() });
+  document.getElementById('p-task-name').value = '';
+  document.getElementById('p-task-link').value = '';
+  renderTaskChips();
+}
+
+function removeTask(id) {
+  appState.tasks = appState.tasks.filter(t => t.id !== id);
+  renderTaskChips();
+}
+
+function renderTaskChips() {
+  const el = document.getElementById('pub-task-chips');
+  el.innerHTML = appState.tasks.map(t => `
+    <div class="task-chip">
+      <span class="chip-icon">${t.type==='follow'?'📲':t.type==='visit'?'⏱️':'✏️'}</span>
+      <span class="chip-name">${t.name}${t.link ? ` <a href="${t.link}" style="color:var(--blue);font-size:0.72rem" target="_blank">↗</a>` : ''}</span>
+      ${t.type==='visit' ? `<span class="chip-secs">${t.secs}s</span>` : ''}
+      <button class="chip-del" onclick="removeTask(${t.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+function doPublish() {
+  const code = document.getElementById('p-code').value.trim().toUpperCase();
+  const type = document.getElementById('p-type').value;
+  let val = '';
+  if (type === 'link')        val = document.getElementById('p-link').value.trim();
+  else if (type === 'webapp') val = document.getElementById('p-webapp').value.trim();
+  else                        val = document.getElementById('p-text').value.trim();
+
+  if (!code) { toast('Insira ou gere um código'); return; }
+  if (!val)  { toast('Preencha o conteúdo a revelar'); return; }
+
+  appState.code = code;
+  appState.contentType = type;
+  appState.contentValue = val;
+
+  // Show output
+  const out = document.getElementById('pub-output');
+  out.style.display = 'block';
+  document.getElementById('out-code-big').textContent = code;
+
+  // QR
+  const qrWrap = document.getElementById('qrcode-out');
+  qrWrap.innerHTML = '';
+  new QRCode(qrWrap, {
+    text: 'UNLOCK:' + code,
+    width: 160, height: 160,
+    colorDark: '#1d6aff', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  // Link
+  const link = location.href.split('#')[0] + '#unlock=' + encodeURIComponent(code);
+  document.getElementById('out-link-text').textContent = link;
+
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  toast('✅ Publicado com sucesso!');
+}
+
+// ── User view ─────────────────────────────────────────────────────────────────
+function renderUserView() {
+  // Reset
+  userTasksDone = [];
+  document.getElementById('revealed-box').classList.remove('show');
+  document.getElementById('code-area').style.display = 'block';
+  document.getElementById('user-tasks').style.display = 'none';
+  document.getElementById('btn-final-unlock').style.display = 'none';
+  document.getElementById('lock-circle').classList.remove('open');
+  document.getElementById('lock-icon').textContent = '🔒';
+  document.getElementById('lock-title').textContent = 'Desbloquear conteúdo';
+  document.getElementById('lock-sub').textContent = 'Digite o código para ver o que precisa ser feito.';
+  document.getElementById('code-input').value = '';
+  document.getElementById('err-msg').textContent = '';
+  document.getElementById('btn-lookup').disabled = false;
+  document.getElementById('btn-lookup').innerHTML = '🔍 Buscar';
+}
+
+// Busca o código → simula consulta e mostra as etapas necessárias
+function lookupCode(override) {
+  const val = (override || document.getElementById('code-input').value).trim().toUpperCase();
+  const err = document.getElementById('err-msg');
+  err.textContent = '';
+
+  if (!val) { err.textContent = 'Digite um código.'; return; }
+  if (!appState.code) { err.textContent = 'Nenhum desbloqueio publicado ainda.'; return; }
+
+  const btn = document.getElementById('btn-lookup');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Buscando…';
+
+  // simula consulta (latência de busca das etapas)
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.innerHTML = '🔍 Buscar';
+
+    if (val !== appState.code) {
+      err.textContent = '❌ Código não encontrado.';
+      document.getElementById('code-input').style.borderColor = 'var(--danger)';
+      setTimeout(() => {
+        document.getElementById('code-input').style.borderColor = '';
+        err.textContent = '';
+      }, 2000);
+      return;
+    }
+
+    showTasksForCode();
+  }, 700);
+}
+
+function showTasksForCode() {
+  document.getElementById('code-area').style.display = 'none';
+
+  if (!appState.tasks.length) {
+    // sem etapas: desbloqueia direto
+    reveal();
+    return;
+  }
+
+  document.getElementById('lock-title').textContent = 'Quase lá!';
+  document.getElementById('lock-sub').textContent = 'Complete as etapas abaixo para desbloquear.';
+
+  const tasksEl = document.getElementById('user-tasks');
+  tasksEl.style.display = 'block';
+  document.getElementById('user-task-list').innerHTML = appState.tasks.map((t,i) => `
+    <div class="task-row" id="tr-${i}" onclick="handleTaskClick(${i})" style="cursor:pointer">
+      <div class="task-check" id="tc-${i}">${t.type==='follow'?'📲':t.type==='visit'?'⏱️':'✏️'}</div>
+      <div class="task-info">
+        <div class="task-info-name">${t.name}</div>
+        ${t.type==='follow' && t.link ? `<div style="font-size:0.73rem;color:var(--blue);margin-top:0.2rem">${t.link}</div>` : ''}
+        ${t.type==='visit' ? `<div style="font-size:0.73rem;color:var(--muted);margin-top:0.2rem" id="tv-${i}">Fique ${t.secs}s na página para concluir</div>` : ''}
+        ${t.type==='custom' ? `<div style="font-size:0.73rem;color:var(--muted);margin-top:0.2rem">Toque para marcar como feito</div>` : ''}
+      </div>
+      <div id="tt-${i}" style="font-size:1.2rem;color:var(--blue);font-weight:700;margin-left:auto;padding-left:0.5rem">›</div>
+    </div>
+  `).join('');
+
+  updateFinalUnlockBtn();
+}
+
+function updateFinalUnlockBtn() {
+  const allDone = appState.tasks.every((_,i) => userTasksDone.includes(i));
+  const btn = document.getElementById('btn-final-unlock');
+  btn.style.display = allDone ? 'flex' : 'none';
+}
+
+function handleTaskClick(idx) {
+  const t = appState.tasks[idx];
+  if (!t || userTasksDone.includes(idx)) return;
+  if (t.type === 'visit')  { openVisitTask(idx); return; }
+  if (t.type === 'follow') { if (t.link) window.open(t.link, '_blank'); markTask(idx); return; }
+  if (t.type === 'custom') { markTask(idx); return; }
+}
+
+function markTask(idx) {
+  if (userTasksDone.includes(idx)) return;
+  userTasksDone.push(idx);
+  const row = document.getElementById(`tr-${idx}`);
+  if (row) { row.classList.add('done'); row.style.cursor = 'default'; row.onclick = null; }
+  const c = document.getElementById(`tc-${idx}`);
+  if (c) c.textContent = '✓';
+  const tt = document.getElementById(`tt-${idx}`);
+  if (tt) { tt.textContent = '✓'; tt.style.color = 'var(--success)'; }
+  const tv = document.getElementById(`tv-${idx}`);
+  if (tv) tv.textContent = '✅ Concluído!';
+  updateFinalUnlockBtn();
+}
+
+// ── Overlay fullscreen: tarefa "ficar na página" ───────────────────────────────
+let visitState = { idx: null, left: 0, total: 0, paused: false, interval: null, done: false };
+
+function openVisitTask(idx) {
+  const t = appState.tasks[idx];
+  if (!t || !t.link) { toast('Link da tarefa não configurado'); return; }
+
+  visitState = { idx, left: t.secs, total: t.secs, paused: false, interval: null, done: false };
+
+  document.getElementById('visit-iframe').src = t.link;
+  document.getElementById('visit-progress-bar').style.width = '0%';
+  document.getElementById('visit-progress-label').textContent = `0s / ${t.secs}s`;
+  const doneBtn = document.getElementById('visit-done-btn');
+  doneBtn.style.display = 'none';
+  doneBtn.disabled = true;
+  document.getElementById('visit-overlay').classList.add('active');
+
+  visitState.interval = setInterval(() => {
+    if (visitState.paused) return;
+    visitState.left--;
+    const elapsed = visitState.total - visitState.left;
+    const pct = Math.min(100, (elapsed / visitState.total) * 100);
+    document.getElementById('visit-progress-bar').style.width = pct + '%';
+    document.getElementById('visit-progress-label').textContent = `${elapsed}s / ${visitState.total}s`;
+
+    if (visitState.left <= 0) {
+      clearInterval(visitState.interval);
+      visitState.done = true;
+      const btn = document.getElementById('visit-done-btn');
+      btn.style.display = 'flex';
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+function confirmVisitDone() {
+  if (!visitState.done) return;
+  const idx = visitState.idx;
+  document.getElementById('visit-overlay').classList.remove('active');
+  document.getElementById('visit-iframe').src = 'about:blank';
+  markTask(idx);
+}
+
+function closeWebapp() {
+  document.getElementById('webapp-overlay').classList.remove('active');
+  document.getElementById('webapp-iframe').srcdoc = '';
+  // mostra o conteúdo revelado normal tbm
+  const box = document.getElementById('revealed-box');
+  const labels = { webapp:'🌐 WEBAPP DESBLOQUEADA' };
+  document.getElementById('rev-badge').textContent = '🌐 WEBAPP DESBLOQUEADA';
+  document.getElementById('rev-content').textContent = 'Sua WebApp foi desbloqueada com sucesso!';
+  document.getElementById('rev-link-wrap').innerHTML =
+    `<button class="rev-link-btn" onclick="reopenWebapp()" style="border:none;cursor:pointer">▶ Abrir novamente</button>`;
+  box.classList.add('show');
+}
+
+function reopenWebapp() {
+  document.getElementById('webapp-overlay').classList.add('active');
+  document.getElementById('webapp-iframe').srcdoc = appState.contentValue;
+}
+
+// pausa contagem do overlay se trocar de aba (evita burlar deixando em background)
+document.addEventListener('visibilitychange', () => {
+  if (visitState.interval) visitState.paused = document.hidden;
+});
+
+// ── Unlock final (depois de todas as etapas concluídas) ───────────────────────
+function finalUnlock() {
+  reveal();
+}
+
+function reveal() {
+  document.getElementById('lock-circle').classList.add('open');
+  document.getElementById('lock-icon').textContent = '🔓';
+  document.getElementById('lock-title').textContent = '🎉 Desbloqueado!';
+  document.getElementById('lock-sub').textContent = 'Aqui está o conteúdo para você.';
+  document.getElementById('code-area').style.display = 'none';
+  document.getElementById('user-tasks').style.display = 'none';
+
+  if (appState.contentType === 'webapp') {
+    // Abre o HTML em tela cheia como iframe srcdoc
+    const overlay = document.getElementById('webapp-overlay');
+    const iframe  = document.getElementById('webapp-iframe');
+    iframe.srcdoc = appState.contentValue;
+    overlay.classList.add('active');
+    return;
+  }
+
+  const box = document.getElementById('revealed-box');
+  const labels = { text:'✅ MENSAGEM REVELADA', link:'🔗 LINK DESBLOQUEADO', coupon:'🎟️ CUPOM DESBLOQUEADO' };
+  document.getElementById('rev-badge').textContent = labels[appState.contentType] || '✅ DESBLOQUEADO';
+  document.getElementById('rev-content').textContent = appState.contentValue;
+
+  if (appState.contentType === 'link') {
+    document.getElementById('rev-link-wrap').innerHTML =
+      `<a class="rev-link-btn" href="${appState.contentValue}" target="_blank">Acessar link ↗</a>`;
+  } else {
+    document.getElementById('rev-link-wrap').innerHTML = '';
+  }
+
+  box.classList.add('show');
+  confetti();
+  setTimeout(() => box.scrollIntoView({ behavior:'smooth', block:'center' }), 100);
+}
+
+// ── Confetti ──────────────────────────────────────────────────────────────────
+function confetti() {
+  const wrap = document.getElementById('conf-wrap');
+  const colors = ['#1d6aff','#60a5fa','#10b981','#fbbf24','#f472b6','#a78bfa'];
+  for (let i=0;i<60;i++) {
+    const d = document.createElement('div');
+    d.className = 'conf-dot';
+    Object.assign(d.style, {
+      left: Math.random()*100+'vw',
+      top: (Math.random()*-20)+'px',
+      background: colors[Math.floor(Math.random()*colors.length)],
+      width: (5+Math.random()*9)+'px',
+      height: (5+Math.random()*9)+'px',
+      animationDelay: Math.random()*0.7+'s',
+      animationDuration: (0.7+Math.random()*0.7)+'s',
+    });
+    wrap.appendChild(d);
+  }
+  setTimeout(() => wrap.innerHTML='', 2500);
+}
+
+// ── QR Scanner ────────────────────────────────────────────────────────────────
+function switchCTab(tab) {
+  document.querySelectorAll('.ctab').forEach((b,i) => b.classList.toggle('active',(i===0&&tab==='manual')||(i===1&&tab==='qr')));
+  document.querySelectorAll('.ctab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('cpane-'+tab).classList.add('active');
+  if (tab==='qr') startQR(); else stopQR();
+}
+
+function startQR() {
+  if (qrScanner) return;
+  const el = document.getElementById('qr-reader');
+  el.innerHTML = '';
+
+  // tenta BarcodeDetector nativo primeiro (Chrome/Android)
+  if ('BarcodeDetector' in window) {
+    startQRNative(el);
+  } else {
+    startQRLib(el);
+  }
+}
+
+function startQRNative(el) {
+  const video = document.createElement('video');
+  video.setAttribute('playsinline', '');
+  video.style.cssText = 'width:100%;border-radius:12px;display:block';
+  el.appendChild(video);
+
+  const detector = new BarcodeDetector({ formats: ['qr_code'] });
+  let stream = null;
+  let rafId = null;
+
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(s => {
+      stream = s;
+      video.srcObject = s;
+      video.play();
+
+      const scan = async () => {
+        if (video.readyState >= 2) {
+          const results = await detector.detect(video).catch(() => []);
+          if (results.length) {
+            const code = results[0].rawValue.replace('UNLOCK:', '').trim().toUpperCase();
+            cancelAnimationFrame(rafId);
+            stream.getTracks().forEach(t => t.stop());
+            qrScanner = null;
+            document.getElementById('code-input').value = code;
+            switchCTab('manual');
+            setTimeout(() => lookupCode(code), 200);
+            return;
+          }
+        }
+        rafId = requestAnimationFrame(scan);
+      };
+      rafId = requestAnimationFrame(scan);
+
+      // guarda referência para stopQR
+      qrScanner = { stop: () => { cancelAnimationFrame(rafId); stream.getTracks().forEach(t => t.stop()); return Promise.resolve(); } };
+    })
+    .catch(() => startQRLib(el));
+}
+
+function startQRLib(el) {
+  try {
+    const scanner = new Html5Qrcode('qr-reader');
+    scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      decoded => {
+        const code = decoded.replace('UNLOCK:', '').trim().toUpperCase();
+        document.getElementById('code-input').value = code;
+        stopQR(); switchCTab('manual');
+        setTimeout(() => lookupCode(code), 200);
+      },
+      () => {}
+    ).then(() => {
+      qrScanner = scanner;
+    }).catch(() => {
+      el.innerHTML = '<p style="text-align:center;padding:1.5rem;color:var(--muted);font-size:0.82rem">Permita o acesso à câmera e tente novamente.<br><br><small>Certifique-se de estar em HTTPS ou localhost.</small></p>';
+    });
+  } catch(e) {
+    el.innerHTML = '<p style="text-align:center;padding:1.5rem;color:var(--muted);font-size:0.82rem">QR não suportado neste navegador.</p>';
+  }
+}
+
+function stopQR() {
+  if (qrScanner) { qrScanner.stop().catch(() => {}); qrScanner = null; }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function copyText(txt, msg) {
+  navigator.clipboard.writeText(txt).then(() => toast(msg));
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+// ── Hash auto ─────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const h = location.hash;
+  if (h.startsWith('#unlock=')) {
+    document.getElementById('code-input').value = decodeURIComponent(h.replace('#unlock=',''));
+  }
+});
+</script>
+</body>
+</html>
