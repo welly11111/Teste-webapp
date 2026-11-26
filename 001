@@ -2,13 +2,268 @@
   [
     {
       "desc": "Site da manu batidão",
-      "name": "Manu batidão V3",
+      "name": "Manu batidão",
       "icon_url": "https://yt3.ggpht.com/XSBR9b0apFVgD5m20v7AvM1Z2BLuE2twEDyZA2QA3Bf_xNP9Pn4A_hDAjfGvFOTLKi7gw9VQzig=s88-c-k-c0x00ffffff-no-rj"
     }
   ],
   [
     {
-      "main_html": "\u003Chtml\u003E...\u003C/html\u003E"
+      "main_html": "<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manu Bahtidão | A Rainha do Tecnomelody</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0d0216;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+
+    /* Cabeçalho e Navegação */
+    header {
+      background: linear-gradient(90deg, #1b032e, #3a065c);
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ff007f;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #ff007f;
+      text-shadow: 0 0 10px rgba(255, 0, 127, 0.7);
+    }
+
+    nav a {
+      color: #ffffff;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #00f0ff;
+    }
+
+    /* Banner Principal */
+    .hero {
+      text-align: center;
+      padding: 90px 20px;
+      background: radial-gradient(circle at center, #320854 0%, #0d0216 80%);
+    }
+
+    .hero h2 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ff007f, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 650px;
+      margin: 0 auto 30px;
+      color: #dcd0e8;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: #ff007f;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 30px;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.6);
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    .btn:hover {
+      background: #d6006b;
+      transform: scale(1.05);
+    }
+
+    /* Seções Gerais */
+    section {
+      padding: 60px 5%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    section h3 {
+      font-size: 2rem;
+      margin-bottom: 25px;
+      border-left: 5px solid #00f0ff;
+      padding-left: 15px;
+      text-transform: uppercase;
+    }
+
+    /* Cards de Músicas */
+    .grid-musicas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #1a062b;
+      padding: 25px;
+      border-radius: 12px;
+      border: 1px solid #3c1161;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: #ff007f;
+    }
+
+    .card h4 {
+      color: #00f0ff;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+    /* Agenda de Shows */
+    .agenda-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1a062b;
+      padding: 18px 25px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #ff007f;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .agenda-data {
+      font-weight: bold;
+      color: #00f0ff;
+      font-size: 1.1rem;
+    }
+
+    /* Rodapé */
+    footer {
+      text-align: center;
+      padding: 35px 20px;
+      background: #08010e;
+      border-top: 1px solid #2a0845;
+      margin-top: 40px;
+      color: #9b8ca8;
+    }
+
+    .redes a {
+      color: #00f0ff;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Manu Bahtidão</h1>
+    <nav>
+      <a href="#sobre">Sobre</a>
+      <a href="#sucessos">Sucessos</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#contato">Contato</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h2>O Fenômeno do Tecnomelody</h2>
+    <p>Do Pará para todo o Brasil: batidas envolventes, energia de paredão e os maiores hits que conquistaram as paradas nacionais.</p>
+    <a href="#sucessos" class="btn">Ouvir Hits</a>
+  </div>
+
+  <section id="sobre">
+    <h3>Sobre a Artista</h3>
+    <p>
+      Emanuella Tenório Rocha, conhecida nacionalmente como <strong>Manu Bahtidão</strong>, é cantora e compositora. Nascida em Alagoas e consagrada no Pará, tornou-se um dos maiores nomes do tecnomelody e do forró eletrônico, levando o ritmo do Norte para o topo das plataformas digitais e grandes palcos pelo país.
+    </p>
+  </section>
+
+  <section id="sucessos">
+    <h3>Principais Sucessos</h3>
+    <div class="grid-musicas">
+      <div class="card">
+        <h4>Daqui Pra Sempre</h4>
+        <p>Feat. Simone Mendes — Um dos maiores fenômenos do streaming nacional e presença constante nos paredões.</p>
+      </div>
+      <div class="card">
+        <h4>Torre Eiffel</h4>
+        <p>Feat. Guilherme & Benuto — Marco histórico ao colocar o tecnomelody no topo das paradas do Brasil.</p>
+      </div>
+      <div class="card">
+        <h4>Abismo</h4>
+        <p>Feat. Mari Fernandez — Sucesso estrondoso nas plataformas digitais e shows por todo o país.</p>
+      </div>
+      <div class="card">
+        <h4>Quem Perde É Quem Trai</h4>
+        <p>Hit viral nas redes sociais com a batida característica da Banda Batidão.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="agenda">
+    <h3>Próximos Shows</h3>
+    <div class="agenda-item">
+      <span class="agenda-data">SEX • 12 DEZ</span>
+      <span><strong>Belém - PA</strong> • Arena Mangueirão</span>
+      <a href="#contato" class="btn" style="padding: 8px 18px; font-size: 0.85rem;">Ingressos</a>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-data">SÁB • 20 DEZ</span>
+      <span><strong>Manaus - AM</strong> • Gravação Especial Paredão da Bahtidão</span>
+      <a href="#contato" class="btn" style="padding: 8px 18px; font-size: 0.85rem;">Ingressos</a>
+    </div>
+    <div class="agenda-item">
+      <span class="agenda-data">SEX • 27 DEZ</span>
+      <span><strong>Goiânia - GO</strong> • Festival de Verão</span>
+      <a href="#contato" class="btn" style="padding: 8px 18px; font-size: 0.85rem;">Ingressos</a>
+    </div>
+  </section>
+
+  <footer id="contato">
+    <p>Acompanhe a Manu Bahtidão nas redes oficiais:</p>
+    <div class="redes" style="margin: 15px 0;">
+      <a href="https://www.instagram.com/manuoficial/" target="_blank">Instagram</a>
+      <a href="https://www.youtube.com/channel/UCTa_X-4mmje4Tk0lig9t4Mw" target="_blank">YouTube</a>
+      <a href="https://linktr.ee/Manubatidao" target="_blank">Linktree Oficial</a>
+    </div>
+    <p style="font-size: 0.85rem;">Página demonstrativa desenvolvida em HTML5 & CSS3.</p>
+  </footer>
+
+</body>
+</html>"
     }
   ]
 ]
